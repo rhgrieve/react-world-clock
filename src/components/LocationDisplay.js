@@ -55,24 +55,26 @@ const SC = styled.span`
   font-size: 2rem;
 `;
 
-const LocationDisplay = ({ timezone, removeClock }) => {
+const LocationDisplay = ({ city, removeClock }) => {
   const startTime = new Date(Date.now()).toLocaleTimeString("en-US", {
-    timeZone: timezone
+    timeZone: city.fields.timezone
   });
   const [time, setTime] = useState(startTime);
   const [view, setView] = useState("digital");
 
   const timezoneAbbreviation = new Date(Date.now())
     .toLocaleTimeString("en-US", {
-      timeZone: timezone,
+      timeZone: city.fields.timezone,
       timeZoneName: "short"
     })
     .split(" ")[2];
-  const placeArray = timezone.split("/");
-  const placeName = placeArray[placeArray.length - 1];
 
   var n = useRef(null);
   var t = useRef(null);
+
+  useEffect(() => {
+    // console.log(city.fields.timezone);
+  }, [city]);
 
   useEffect(() => {
     const timeOffset = 1000 - new Date(Date.now()).getMilliseconds();
@@ -80,7 +82,7 @@ const LocationDisplay = ({ timezone, removeClock }) => {
       t.current = setInterval(() => {
         setTime(
           new Date(Date.now()).toLocaleTimeString("en-US", {
-            timeZone: timezone
+            timeZone: city.fields.timezone
           })
         );
       });
@@ -90,7 +92,7 @@ const LocationDisplay = ({ timezone, removeClock }) => {
       n.current = null;
       clearInterval(t.current);
     };
-  }, [timezone]);
+  }, [city.fields.timezone]);
 
   const [timeDig, timeOfDay] = time.split(" ");
   const [hours, minutes, seconds] = timeDig.split(":");
@@ -102,10 +104,10 @@ const LocationDisplay = ({ timezone, removeClock }) => {
   return (
     <Container>
       <div style={{ display: "inline" }}>
-        <PlaceString>{placeName}</PlaceString>
+        <PlaceString>{city.fields.asciiname}</PlaceString>
         <TimezoneAbbreviation>{timezoneAbbreviation}</TimezoneAbbreviation>
       </div>
-      <Close name={timezone} onClick={closeHandler}>
+      <Close name={city.fields.geonameid} onClick={closeHandler}>
         <FontAwesomeIcon style={{ float: "right" }} icon={faTimes} />
       </Close>
       {view === "digital" && (

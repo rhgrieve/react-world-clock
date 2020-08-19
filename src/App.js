@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import "normalize.css";
 import styled from "styled-components";
@@ -8,6 +8,17 @@ import { timezones as tz } from "./data/timezones";
 
 import LocationDisplay from "./components/LocationDisplay";
 import PlaceInput from "./components/PlaceInput";
+
+function lsTest() {
+  var test = "test";
+  try {
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 const Title = styled.h1`
   color: #e3e3e3;
@@ -40,28 +51,66 @@ const FooterLink = styled.a`
   }
 `;
 
+const Header = styled.header`
+  opacity: ${(props) => (props.showHeader ? 1 : 0)};
+  transition: opacity 1s ease-in;
+`;
+
 export default function App() {
   const [clocks, setClocks] = useState([]);
+  const [showHeader, setShowHeader] = useState(true);
 
-  const addClock = (timezone) => {
-    setClocks([tz.indexOf(timezone), ...clocks]);
+  // const manageLocalStorage = () => {
+
+  // }
+
+  useEffect(() => {
+    if (lsTest() === true) {
+      const hasClocksInStorage =
+        localStorage.getItem("clocks") &&
+        JSON.parse(localStorage.getItem("clocks")).length > 0;
+      const storedClocks = hasClocksInStorage
+        ? JSON.parse(localStorage.getItem("clocks"))
+        : null;
+      if (hasClocksInStorage) {
+        setClocks(storedClocks);
+      }
+    } else {
+      console.log("localStorage not available");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (lsTest() === true) {
+      localStorage.setItem("clocks", JSON.stringify(clocks));
+    } else {
+      console.log("localStorage not available");
+    }
+  }, [clocks]);
+
+  const addClock = (city) => {
+    setClocks([city, ...clocks]);
   };
 
-  const removeClock = (timezone) => {
-    setClocks(clocks.filter((zone) => zone !== tz.indexOf(timezone)));
+  const removeClock = (id) => {
+    setClocks(
+      clocks.filter((city) => city.fields.geonameid !== parseInt(id, 10))
+    );
   };
 
   return (
     <div className="App">
       <Container>
-        <Title>World Clock</Title>
-        <PlaceInput addClock={addClock} />
+        <Header showHeader={showHeader}>
+          <Title>World Clock</Title>
+          <PlaceInput addClock={addClock} />
+        </Header>
         {clocks &&
-          clocks.map((tzIndex) => (
+          clocks.map((city) => (
             <LocationDisplay
-              key={tz[tzIndex]}
+              key={city.id}
               removeClock={removeClock}
-              timezone={tz[tzIndex]}
+              city={city}
             />
           ))}
       </Container>

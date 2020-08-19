@@ -83,22 +83,24 @@ const PlaceInput = ({ addClock }) => {
   }, [searchValue]);
 
   useEffect(() => {
-    if (searchValue.length > 0) {
-      setResults(
-        timezones
-          .map((timezone) => {
-            return {
-              id: timezone,
-              name: timezone.includes("_")
-                ? timezone.replaceAll("_", " ")
-                : timezone
-            };
-          })
-          .filter((timezone) =>
-            timezone.name.toLowerCase().includes(searchValue)
-          )
-          .slice(0, 3)
+    async function fetchData() {
+      const get = await fetch(
+        `https://rough-night-99a5.alkmt.workers.dev/cities?fields%5B%5D=geonameid&fields%5B%5D=asciiname&fields%5B%5D=timezone&filterByFormula=SEARCH(%22${searchValue.toLowerCase()}%22%2C+LOWER(asciiname))&maxRecords=3&sort%5B0%5D%5Bfield%5D=population&sort%5B0%5D%5Bdirection%5D=desc`
       );
+      const res = await get.json();
+      console.log(res.records);
+      setResults(res.records);
+    }
+    if (searchValue.length > 0) {
+      fetchData();
+      // console.log(time);
+      // const time = fetchData();
+      // setResults(
+      //   timezones.map((timezone) => {
+      //     return timezone;
+      //   })
+      // );
+      // console.log(timezones);
     } else {
       setResults([]);
     }
@@ -110,7 +112,11 @@ const PlaceInput = ({ addClock }) => {
   };
 
   const clickHandler = (e) => {
-    addClockHandler(e.target.value);
+    addClockHandler(
+      results.filter(
+        (city) => city.fields.geonameid === parseInt(e.target.value, 10)
+      )[0]
+    );
   };
 
   return (
@@ -127,10 +133,13 @@ const PlaceInput = ({ addClock }) => {
       >
         <StyledList>
           {results &&
-            results.map((place) => (
-              <StyledListItem key={place.id}>
-                <StyledButton value={place.id} onClick={clickHandler}>
-                  {place.name}
+            results.map((city) => (
+              <StyledListItem key={city.id}>
+                <StyledButton
+                  value={city.fields.geonameid}
+                  onClick={clickHandler}
+                >
+                  {city.fields.asciiname}
                 </StyledButton>
               </StyledListItem>
             ))}
