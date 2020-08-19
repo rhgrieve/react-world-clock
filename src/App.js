@@ -60,10 +60,6 @@ export default function App() {
   const [clocks, setClocks] = useState([]);
   const [showHeader, setShowHeader] = useState(true);
 
-  // const manageLocalStorage = () => {
-
-  // }
-
   useEffect(() => {
     if (lsTest() === true) {
       const hasClocksInStorage =
