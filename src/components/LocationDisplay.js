@@ -68,7 +68,7 @@ const LocationDisplay = ({ city, removeClock }) => {
       timeZoneName: "short"
     })
     .split(" ")[2];
-
+  //
   var n = useRef(null);
   var t = useRef(null);
 
